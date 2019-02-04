@@ -1,24 +1,26 @@
-FROM debian:stretch-slim
-
-RUN groupadd -r pivx && useradd -r -m -g pivx pivx
+FROM debian:stretch-slim as builder
 
 RUN set -ex \
 	&& apt-get update \
-	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu wget \
-	&& rm -rf /var/lib/apt/lists/*
+	&& apt-get install -qq --no-install-recommends ca-certificates wget
 
-ENV PIVX_VERSION=3.1.1 \
-	PIVX_URL=https://github.com/PIVX-Project/PIVX/releases/download/v3.1.1/pivx-3.1.1-x86_64-linux-gnu.tar.gz \
-	PIVX_SHA256=aac5b13beb9ff96b0ce62d2258d54166c756c8336672a67c7aae6b73a76b0c03 \
-	PIVX_DATA=/data
+ENV PIVX_VERSION=3.1.1
+ENV PIVX_URL=https://github.com/PIVX-Project/PIVX/releases/download/v$PIVX_VERSION/pivx-$PIVX_VERSION-x86_64-linux-gnu.tar.gz \
+	PIVX_SHA256=aac5b13beb9ff96b0ce62d2258d54166c756c8336672a67c7aae6b73a76b0c03
 
-# install pivx binaries
 RUN set -ex \
 	&& cd /tmp \
 	&& wget -qO pivx.tar.gz "$PIVX_URL" \
 	&& echo "$PIVX_SHA256 pivx.tar.gz" | sha256sum -c - \
-	&& tar -xzvf pivx.tar.gz -C /usr/local --strip-components=1 --exclude=*-qt \
-	&& rm -rf /tmp/*
+	&& tar -xzvf pivx.tar.gz -C /usr/local --strip-components=1 --exclude=*-qt
+
+
+FROM debian:stretch-slim
+COPY --from=builder /usr/local/bin/pivxd /usr/local/bin/pivx-cli /usr/local/bin/
+RUN groupadd -r pivx && useradd -r -m -g pivx pivx \
+	&& ln -s /usr/local/bin/pivx-cli /usr/local/bin/c
+
+ENV PIVX_DATA=/data
 
 # create data directory
 RUN mkdir "$PIVX_DATA" \

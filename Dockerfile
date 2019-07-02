@@ -4,9 +4,9 @@ RUN set -ex \
 	&& apt-get update \
 	&& apt-get install -qq --no-install-recommends ca-certificates wget
 
-ENV PIVX_VERSION=3.1.1
+ENV PIVX_VERSION=3.3.0
 ENV PIVX_URL=https://github.com/PIVX-Project/PIVX/releases/download/v$PIVX_VERSION/pivx-$PIVX_VERSION-x86_64-linux-gnu.tar.gz \
-	PIVX_SHA256=aac5b13beb9ff96b0ce62d2258d54166c756c8336672a67c7aae6b73a76b0c03
+	PIVX_SHA256=ee01caf0cc1aba794aa1d1eb9daf156c489f037c1b870a81c6528d74fcd75f17
 
 RUN set -ex \
 	&& cd /tmp \
